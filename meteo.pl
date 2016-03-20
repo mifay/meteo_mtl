@@ -48,24 +48,34 @@ while (my $Ligne = <LecteurDeFichier>)
    {
       if ($Ligne =~ /<span class=\"day_title\">(\w{3})<\/span><span>(\d{1,2}) (.{3,10})<\/span>/)
       {
-         print "    $1 le $2 $3: ";
+         print "    $1 le $2 $3: \n";
       }
-      if ($Ligne =~ /<div class=\"feels-like seven_days_metric\">	&nbsp;<span>(-|)(\d{1,2})<\/span>/)
+      if ($Ligne =~ /<div class=\"feels-like seven_days_metric seven_days_metric_c \">	&nbsp;<span>(-|)(\d{1,2})<\/span>/)
       {
-         print "TR=\"$1$2 C\" ";
+         print "\tTR=\"$1$2 C\" \n";
       }
       if ($Ligne =~ /<div class=\"fx-details \">	&nbsp;(\d{1,3}%)	<\/div>/)
       {
-         print "PDP=\"$1\" ";
+         print "\tPDP=\"$1\" \n";
       }
-      if ($Ligne =~ /<div class=\"fx-details seven_days_metric rain\">	&nbsp;(&lt;)*(.{4,10})	<\/div>/)
+      if ($Ligne =~ /<div class=\"fx-details seven_days_metric seven_days_metric_kmh snow \">\W*&nbsp;(.{4,15})\W*<\/div>/)
       {
-         print "Q=\"$2\" ";
+         print "\tNeige=\"$1\" \n";
       }
-      if ($Ligne =~ /<div class=\"fx-details seven_days_metric wind \">	&nbsp;(\w{1,2})&nbsp;(\d{1,4})&nbsp;(.{3,10})	<\/div>/)
+      if ($Ligne =~ /<div class=\"fx-details seven_days_metric rain seven_days_metric_kmh\">	&nbsp;(.{4,15})	<\/div>/)
       {
-         print "Vent=\"$2$3 $1\"";
+         print "\tPluie=\"$1\" \n";
       }
+      if ($Ligne =~ /<div class=\"fx-details seven_days_metric seven_days_metric_kmh wind \">	&nbsp;(\d{1,3})&nbsp;km\/h&nbsp;(.{1,10})	<\/div>/)
+      {
+         print "\tVent=\"$1km/h $2\" \n";
+      }
+      if ($Ligne =~ /<div class=\"fx-details sun \">	&nbsp;(\d+)	<\/div>/)
+      {
+         print "\tSoleil=\"$1\" \n";
+      }
+
+
       print "\n";
    }
 }       
