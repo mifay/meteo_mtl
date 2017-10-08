@@ -19,6 +19,7 @@
 
 use strict;
 use warnings;
+use open ':std', ':encoding(UTF-8)';
 require LWP::UserAgent;
 my $ua = LWP::UserAgent->new;
 $ua->agent('Mozilla/5.0');
