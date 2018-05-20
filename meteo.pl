@@ -20,12 +20,15 @@
 use strict;
 use warnings;
 use open ':std', ':encoding(UTF-8)';
+use JSON qw( decode_json );
+
 require LWP::UserAgent;
+
 my $ua = LWP::UserAgent->new;
 $ua->agent('Mozilla/5.0');
 $ua->timeout(10);
 $ua->env_proxy;
-my $URL = "http://www.meteomedia.com/meteo/canada/quebec/montreal";   
+my $URL = "https://www.meteomedia.com/api/data/caqc0363/cm?ts=1232";   
 my $response = $ua->get("$URL");
 my $HTML = "";
 if ($response->is_success) 
@@ -36,50 +39,33 @@ else
    {
    die $response->status_line;
    } 
-open RedacteurDeFichier,">input.txt" or die $!;
-print RedacteurDeFichier "$HTML";
-close RedacteurDeFichier;
-print "\n\n    =====================================================================\n";
-print "    ==============~*=~*=~*=~*=~*=~* METEO *~=*~=*~=*~=*~=*~==============\n";
-print "    =====================================================================\n";
-open LecteurDeFichier,"<input.txt" or die "E/S : $!\n";
-while (my $Ligne = <LecteurDeFichier>)
-{
-   if($Ligne =~ /day_(\d)/)
-   {
-      if ($Ligne =~ /<span class=\"day_title\">(\w{3})<\/span><span>(\d{1,2}) (.{3,10})<\/span>/)
-      {
-         print "    $1 le $2 $3: \n";
-      }
-      if ($Ligne =~ /<div class=\"feels-like seven_days_metric seven_days_metric_c \">	&nbsp;<span>(-|)(\d{1,2})<\/span>/)
-      {
-         print "\tTR=\"$1$2 C\" \n";
-      }
-      if ($Ligne =~ /<div class=\"fx-details \">	&nbsp;(\d{1,3}%)	<\/div>/)
-      {
-         print "\tPDP=\"$1\" \n";
-      }
-      if ($Ligne =~ /<div class=\"fx-details seven_days_metric seven_days_metric_kmh snow \">\W*&nbsp;(.{4,15})\W*<\/div>/)
-      {
-         print "\tNeige=\"$1\" \n";
-      }
-      if ($Ligne =~ /<div class=\"fx-details seven_days_metric rain seven_days_metric_kmh\">	&nbsp;(.{4,15})	<\/div>/)
-      {
-         print "\tPluie=\"$1\" \n";
-      }
-      if ($Ligne =~ /<div class=\"fx-details seven_days_metric seven_days_metric_kmh wind \">	&nbsp;(\d{1,3})&nbsp;km\/h&nbsp;(.{1,10})	<\/div>/)
-      {
-         print "\tVent=\"$1km/h $2\" \n";
-      }
-      if ($Ligne =~ /<div class=\"fx-details sun \">	&nbsp;(\d+)	<\/div>/)
-      {
-         print "\tSoleil=\"$1\" \n";
-      }
 
-
-      print "\n";
-   }
-}       
-print "\n\n";
-close LecteurDeFichier;
-system("rm input.txt");
+my $decodeJson = decode_json($HTML);
+my @septJours = @{$decodeJson->{'sevendays'}{'periods'}};
+foreach my $jour ( @septJours ) {
+    my $date = $jour->{"sd"};
+    my $tr = $jour->{"f"};     
+    my $pdp = $jour->{"pdp"};  
+    my $neige = $jour->{"s"};     
+    my $neigeUnite = $jour->{"su"};    
+    my $pluie = $jour->{"r"}; 
+    my $pluieUnite = $jour->{"ru"};    
+    my $vent = $jour->{"w"};     
+    my $ventUnite = $jour->{"wu"}; 
+    my $ventDir = $jour->{"wd"}; 
+    my $soleil = $jour->{"sun_hours"};         
+    
+    my $neigeFinal = "";
+    if($neige ne "-")
+    {
+        $neigeFinal=" $neige $neigeUnite";
+    }   
+    
+    my $pluieFinal = "";
+    if($pluie ne "-")
+    {
+        $pluieFinal=" $pluie $pluieUnite";
+    }      
+    
+    print "$date:\tTR=$tr" . "C\tV=$vent$ventUnite $ventDir\tSol=$soleil\tPDP=$pdp%$neigeFinal$pluieFinal\n";
+}
