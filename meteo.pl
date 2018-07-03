@@ -41,31 +41,53 @@ else
    } 
 
 my $decodeJson = decode_json($HTML);
+
+my $jour = $decodeJson->{'obs'};
+my $date = $jour->{"updatetime"};
+my $tr = $jour->{"f"};
+my $temp = $jour->{"t"};
+my $pdp = "";
+my $neige = "-";
+my $neigeUnite = $jour->{"su"};
+my $pluie = "-";
+my $pluieUnite = $jour->{"ru"};
+my $vent = $jour->{"w"};
+my $ventUnite = $jour->{"wu"};
+my $ventDir = $jour->{"wd"};
+my $soleil = "";
+
+my $neigeFinal = "";
+my $pluieFinal = "";
+
+print "$date:\tTR=$tr" . "C T=$temp" . "C\tV=$vent$ventUnite $ventDir\n";
+
+
 my @septJours = @{$decodeJson->{'sevendays'}{'periods'}};
-foreach my $jour ( @septJours ) {
-    my $date = $jour->{"sd"};
-    my $tr = $jour->{"f"};     
-    my $pdp = $jour->{"pdp"};  
-    my $neige = $jour->{"s"};     
-    my $neigeUnite = $jour->{"su"};    
-    my $pluie = $jour->{"r"}; 
-    my $pluieUnite = $jour->{"ru"};    
-    my $vent = $jour->{"w"};     
-    my $ventUnite = $jour->{"wu"}; 
-    my $ventDir = $jour->{"wd"}; 
-    my $soleil = $jour->{"sun_hours"};         
+foreach $jour ( @septJours ) {
+    $date = $jour->{"sd"};
+    $tr = $jour->{"f"};     
+    $temp = $jour->{"tma"};
+    $pdp = $jour->{"pdp"};  
+    $neige = $jour->{"s"};     
+    $neigeUnite = $jour->{"su"};    
+    $pluie = $jour->{"r"}; 
+    $pluieUnite = $jour->{"ru"};    
+    $vent = $jour->{"w"};     
+    $ventUnite = $jour->{"wu"}; 
+    $ventDir = $jour->{"wd"}; 
+    $soleil = $jour->{"sun_hours"};         
     
-    my $neigeFinal = "";
+    $neigeFinal = "";
     if($neige ne "-")
     {
         $neigeFinal=" $neige $neigeUnite";
     }   
     
-    my $pluieFinal = "";
+    $pluieFinal = "";
     if($pluie ne "-")
     {
         $pluieFinal=" $pluie $pluieUnite";
     }      
     
-    print "$date:\tTR=$tr" . "C\tV=$vent$ventUnite $ventDir\tSol=$soleil\tPDP=$pdp%$neigeFinal$pluieFinal\n";
+    print "$date:\tTR=$tr" . "C T=$temp" . "C\tV=$vent$ventUnite $ventDir\tSol=$soleil\tPDP=$pdp%$neigeFinal$pluieFinal\n";
 }
